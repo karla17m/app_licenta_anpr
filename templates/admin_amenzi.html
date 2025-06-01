@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}Amenzi - TimiCamPark{% endblock %}
+
+{% block content %}
+<style>
+    .admin-container {
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 30px;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.07);
+    }
+
+    h2 {
+        text-align: center;
+        color: #c0392b;
+        margin-bottom: 30px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 30px;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 12px 15px;
+        text-align: center;
+        font-size: 0.95rem;
+    }
+
+    th {
+        background-color: #e74c3c;
+        color: white;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .btn {
+        border: none;
+        padding: 10px 20px;
+        font-size: 0.95rem;
+        border-radius: 6px;
+        cursor: pointer;
+        text-decoration: none;
+        color: white;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .btn-back {
+        background-color: #3498db;
+    }
+
+    .btn-back:hover {
+        background-color: #217dbb;
+        transform: translateY(-2px);
+    }
+
+    .btn-export {
+        background-color: #27ae60;
+    }
+
+    .btn-export:hover {
+        background-color: #219150;
+        transform: translateY(-2px);
+    }
+
+    .btn-delete {
+        background-color: #e74c3c;
+    }
+
+    .btn-delete:hover {
+        background-color: #c0392b;
+        transform: translateY(-2px);
+    }
+
+    .filter-form {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .filter-form input,
+    .filter-form select {
+        padding: 8px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+
+    .flash-message {
+        text-align: center;
+        margin: 15px auto;
+        padding: 10px 15px;
+        max-width: 600px;
+        border-radius: 8px;
+        background-color: #fdecea;
+        color: #c0392b;
+        border: 1px solid #e0b4b4;
+    }
+</style>
+
+<div class="admin-container">
+    <h2>Lista Amenzilor</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-message">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="post" class="filter-form">
+        <input type="text" name="numar_inmatriculare" placeholder="Număr înmatriculare">
+        <select name="zona">
+            <option value="">Toate zonele</option>
+            <option value="Zona 1">Zona 1</option>
+            <option value="Zona 2">Zona 2</option>
+            <option value="Zona 3">Zona 3</option>
+            <option value="Zona 4">Zona 4</option>
+        </select>
+        <button type="submit" class="btn btn-export">Filtrează</button>
+    </form>
+
+    <div style="display: flex; justify-content: center; margin: 30px 0;">
+        <a href="{{ url_for('admin_add_amenda') }}" class="btn btn-export">➕ Adaugă Amendă</a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nr. Înmatriculare</th>
+                <th>Timp Detecție</th>
+                <th>Motiv</th>
+                <th>Zonă</th>
+                <th>Snapshot</th>
+                <th>Acțiuni</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for amenda in amenzi %}
+            <tr>
+                <td>{{ amenda.id_amenda }}</td>
+                <td>{{ amenda.numar_inmatriculare }}</td>
+                <td>{{ amenda.timestamp }}</td>
+                <td>{{ amenda.motiv }}</td>
+                <td>{{ amenda.zona }}</td>
+                <td>
+                    <a href="{{ url_for('static', filename=amenda.snapshot_path) }}" target="_blank">🖼️ Vezi</a>
+                </td>
+                <td>
+                    <form method="POST" action="{{ url_for('sterge_amenda', id_amenda=amenda.id_amenda) }}" onsubmit="return confirm('Sigur vrei să ștergi această amendă?');">
+                        <button type="submit" class="btn btn-delete">Șterge</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="button-container">
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-back">⏪ Înapoi la Dashboard</a>
+        <a href="{{ url_for('export_amenzi') }}" class="btn btn-export">⬇️ Exportă CSV</a>
+    </div>
+</div>
+{% endblock %}

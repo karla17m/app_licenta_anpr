@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <p>Salut,</p>
+    <p>Abonamentul tău a fost înregistrat cu succes:</p>
+    <ul>
+        <li><strong>Număr Înmatriculare:</strong> {{ abonament.numar_inmatriculare }}</li>
+        <li><strong>Zonă:</strong> {{ abonament.zona }}</li>
+        <li><strong>Tip:</strong> {{ abonament.tip_abonament }}</li>
+        <li><strong>Durată:</strong> {{ abonament.durata }} {{ 'ore' if abonament.tip_abonament == 'ora' else 'zile' }}</li>
+    </ul>
+    <p>Mulțumim că folosești TimiCamPark!</p>
+</body>
+</html>

@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+{% block title %}Panou Admin - TimiCamPark{% endblock %}
+
+{% block content %}
+<style>
+    .admin-container {
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 30px;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.07);
+    }
+
+    h2 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 30px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 40px;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 12px 15px;
+        text-align: center;
+    }
+
+    th {
+        background-color: #3498db;
+        color: white;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    .admin-badge {
+        color: #27ae60;
+        font-weight: bold;
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .nav-button,
+    .logout-button {
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        font-size: 0.95rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        text-decoration: none;
+    }
+
+    .nav-button {
+        background-color: #3498db;
+    }
+
+    .nav-button:hover {
+        background-color: #217dbb;
+        transform: translateY(-2px);
+    }
+
+    .logout-button {
+        background-color: #e74c3c;
+    }
+
+    .logout-button:hover {
+        background-color: #c0392b;
+        transform: translateY(-2px);
+    }
+
+    .btn-sm {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+        border-radius: 4px;
+    }
+
+    .btn-add {
+        background-color: #2ecc71;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        margin: 0 10px;
+    }
+
+    .btn-add:hover {
+        background-color: #27ae60;
+    }
+
+    .filter-form {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .filter-form select {
+        padding: 8px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+</style>
+
+<div class="admin-container">
+    <h2>Panou Administrator</h2>
+
+    <div class="text-center" style="margin-bottom: 20px;">
+        <a href="{{ url_for('admin_add_user') }}" class="btn-add">➕ Adaugă Utilizator</a>
+        <a href="{{ url_for('admin_add_abonament') }}" class="btn-add">➕ Adaugă Abonament</a>
+        <a href="{{ url_for('export_abonamente') }}" class="btn-add">📤 Exportă Abonamente CSV</a>
+        <a href="{{ url_for('admin_statistici') }}" class="btn-add">📊 Vezi Statistici</a>
+    </div>
+    
+    <div  class="text-center" style="margin-bottom: 20px;">
+        <a href="{{ url_for('admin_amenzi') }}" class="btn-add">🚔 Vezi Amenzile</a>
+    </div>
+
+    <h4>Utilizatori</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nume</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Acțiuni</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in utilizatori %}
+            <tr>
+                <td>{{ user.id_utilizator }}</td>
+                <td>
+    <a href="{{ url_for('admin_abonamente_utilizator', user_id=user.id_utilizator) }}">
+        {{ user.nume }}
+    </a>
+</td>
+
+                <td>{{ user.email }}</td>
+                <td>
+                    {% if user.este_admin %}
+                        <span class="admin-badge">Admin</span>
+                    {% else %}
+                        Utilizator
+                    {% endif %}
+                </td>
+                <td>
+                    {% if not user.este_admin %}
+                        <form method="post" action="{{ url_for('admin_delete_user', user_id=user.id_utilizator) }}" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Ești sigur că vrei să ștergi acest utilizator?')">Șterge</button>
+                        </form>
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+            </tr>    
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+    <h4>Abonamente</h4>
+    <form method="post" class="filter-form">
+        <label for="zona">Zonă:</label>
+        <select name="zona" id="zona">
+            <option value="">Toate</option>
+            <option value="Zona 1">Zona 1</option>
+            <option value="Zona 2">Zona 2</option>
+            <option value="Zona 3">Zona 3</option>
+            <option value="Zona 4">Zona 4</option>
+        </select>
+
+        <label for="status">Status:</label>
+        <select name="status" id="status">
+            <option value="">Toate</option>
+            <option value="activ">Activ</option>
+            <option value="expirat">Expirat</option>
+        </select>
+
+        <button type="submit" class="btn-add">Filtrează</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Utilizator</th>
+                <th>Nr. Înmatriculare</th>
+                <th>Zonă</th>
+                <th>Tip</th>
+                <th>Durată</th>
+                <th>Început</th>
+                <th>Sfârșit</th>
+                <th>Preț</th>
+                <th>Status</th>
+                <th>Acțiuni</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for abonament in abonamente %}
+            <tr>
+                <td>{{ abonament.id_abonament }}</td>
+                <td>{{ abonament.id_utilizator }}</td>
+                <td>{{ abonament.numar_inmatriculare }}</td>
+                <td>{{ abonament.zona }}</td>
+                <td>{{ abonament.tip_abonament }}</td>
+                <td>{{ abonament.durata }}</td>
+                <td>{{ abonament.data_inceput }}</td>
+                <td>{{ abonament.data_sfarsit }}</td>
+                <td>{{ abonament.pret }}</td>
+                <td>{{ abonament.status }}</td>
+                <td>
+                    <form method="post" action="{{ url_for('admin_delete_abonament', abonament_id=abonament.id_abonament) }}" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Ești sigur că vrei să ștergi acest abonament?')">Șterge</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="button-container">
+        <a href="{{ url_for('hello') }}" class="nav-button">Home</a>
+        <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
+    </div>
+</div>
+{% endblock %}

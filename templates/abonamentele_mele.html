@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% block title %}Abonamentele Mele{% endblock %}
+{% block content %}
+<style>
+    .container-custom {
+        background-color: #fff;
+        border-radius: 12px;
+        padding: 30px;
+        max-width: 900px;
+        margin: 30px auto;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    h1 {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 2.5rem;
+    }
+
+    .filter-options {
+        margin-bottom: 25px;
+        text-align: center;
+    }
+
+    .filter-options form {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .filter-options button {
+        padding: 8px 15px;
+        border: none;
+        border-radius: 5px;
+        background-color: #3498db;
+        color: white;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .filter-options button:hover {
+        background-color: #217dbb;
+        transform: translateY(-2px);
+    }
+
+    .abonament-card {
+        background-color: #e0f7fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid #b2ebf2;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .abonament-card h2 {
+        font-size: 1.1rem;
+        color: #3498db;
+        margin-bottom: 10px;
+    }
+
+    .abonament-card p {
+        margin-bottom: 5px;
+        font-size: 0.95rem;
+        color: #555;
+    }
+
+    .abonament-status {
+        font-weight: bold;
+        font-size: 1rem;
+        margin-top: 10px;
+    }
+
+    .status-Activ {
+        color: #2ecc71;
+    }
+
+    .status-Expirat {
+        color: #e74c3c;
+    }
+
+    .status-Viitor {
+        color: #3498db;
+    }
+
+    .no-subscriptions {
+        text-align: center;
+        font-size: 1.1rem;
+        color: #7f8c8d;
+        margin-top: 20px;
+    }
+
+    .button-container {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+
+    .nav-button, .logout-button {
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        font-size: 0.9rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        text-decoration: none;
+    }
+
+    .nav-button {
+        background-color: #3498db;
+    }
+
+    .nav-button:hover {
+        background-color: #217dbb;
+        transform: translateY(-2px);
+    }
+
+    .logout-button {
+        background-color: #e74c3c;
+    }
+
+    .logout-button:hover {
+        background-color: #c0392b;
+        transform: translateY(-2px);
+    }
+</style>
+
+<div class="container-custom">
+    <h1>Abonamentele Mele</h1>
+
+    <div class="filter-options">
+        <form method="POST" action="{{ url_for('abonamentele_mele') }}">
+            <button type="submit" name="status_filter" value="toate">Toate</button>
+            <button type="submit" name="status_filter" value="activ">Active</button>
+            <button type="submit" name="status_filter" value="expirat">Expirate</button>
+            <button type="submit" name="status_filter" value="viitor">Viitoare</button>
+        </form>
+    </div>
+
+    {% if abonamente %}
+        {% for abonament in abonamente %}
+            <div class="abonament-card">
+                <h2>Abonament #{{ abonament['id_abonament'] }}</h2>
+                <p><strong>Număr Înmatriculare:</strong> {{ abonament['numar_inmatriculare'] }}</p>
+                <p><strong>Zona:</strong> {{ abonament['zona'] }}</p>
+                <p><strong>Tip:</strong> {{ abonament['tip_abonament'] }}</p>
+                <p><strong>Durată:</strong> {{ abonament['durata'] }} {{ 'ore' if abonament['tip_abonament'] == 'ora' else 'zile' }}</p>
+                {% if abonament['data_inceput'] %}
+                <p><strong>Început:</strong> {{ abonament['data_inceput'].strftime('%d-%m-%Y %H:%M') }}</p>
+                {% endif %}
+                {% if abonament['data_sfarsit'] %}
+                <p><strong>Sfârșit:</strong> {{ abonament['data_sfarsit'].strftime('%d-%m-%Y %H:%M') }}</p>
+                {% endif %}
+                <p><strong>Preț:</strong> {{ abonament['pret'] }} RON</p>
+                {% if abonament['data_achizitie'] %}
+                <p><strong>Achiziție:</strong> {{ abonament['data_achizitie'].strftime('%d-%m-%Y %H:%M:%S') }}</p>
+                {% endif %}
+                <p class="abonament-status">
+                    <strong>Status:</strong>
+                    <span class="status-{{ abonament['display_status'] }}">{{ abonament['display_status'] }}</span>
+                </p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="no-subscriptions">Nu aveți abonamente.</p>
+    {% endif %}
+
+    <div class="button-container">
+        <a href="{{ url_for('hello') }}" class="nav-button">Home</a>
+        <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
+    </div>
+</div>
+{% endblock %}

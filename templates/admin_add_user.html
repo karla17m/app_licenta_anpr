@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Adaugă Utilizator{% endblock %}
+{% block content %}
+<div class="container mt-4" style="max-width: 600px;">
+    <h2 class="mb-4">Adaugă Utilizator</h2>
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    <form method="POST">
+        <div class="form-group">
+            <label for="nume">Nume:</label>
+            <input type="text" class="form-control" id="nume" name="nume" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="parola">Parolă:</label>
+            <input type="password" class="form-control" id="parola" name="parola" required>
+        </div>
+        <div class="form-group">
+            <label for="este_admin">Este Admin?</label>
+            <select name="este_admin" class="form-control">
+                <option value="0">Nu</option>
+                <option value="1">Da</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-success">Adaugă</button>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary ml-2">Anulează</a>
+    </form>
+</div>
+{% endblock %}

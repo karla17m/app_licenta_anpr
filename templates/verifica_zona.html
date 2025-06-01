@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Verifică Zona TimiCamPark{% endblock %}
+{% block content %}
+<style>
+    .container-verificare {
+        background-color: #fff;
+        border-radius: 12px;
+        padding: 30px;
+        max-width: 600px;
+        margin: 30px auto;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .container-verificare h2 {
+        color: #2c3e50;
+        margin-bottom: 20px;
+        font-size: 2.2rem;
+        text-align: center;
+    }
+
+    .container-verificare input[type="text"] {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
+
+    .container-verificare button {
+        width: 100%;
+        padding: 12px;
+        background-color: #3498db;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .container-verificare button:hover {
+        background-color: #217dbb;
+        transform: translateY(-2px);
+    }
+
+    .result {
+        margin-top: 20px;
+        font-size: 1.1rem;
+        color: #34495e;
+        text-align: center;
+    }
+
+    .button-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .nav-button,
+    .logout-button {
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        font-size: 0.95rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        text-decoration: none;
+    }
+
+    .nav-button {
+        background-color: #3498db;
+    }
+
+    .nav-button:hover {
+        background-color: #217dbb;
+        transform: translateY(-2px);
+    }
+
+    .logout-button {
+        background-color: #e74c3c;
+    }
+
+    .logout-button:hover {
+        background-color: #c0392b;
+        transform: translateY(-2px);
+    }
+</style>
+
+<div class="container-verificare">
+    <h2>Verifică Zona TimiCamPark</h2>
+    <form method="POST" style="width: 100%;">
+        <input type="text" name="adresa" placeholder="Introdu adresa (ex: Piața Victoriei, Timișoara)" required>
+        <button type="submit">Verifică</button>
+    </form>
+
+    {% if rezultat %}
+        <div class="result">
+            {{ rezultat | safe }}
+        </div>
+    {% endif %}
+
+    <div class="button-container">
+        <a href="{{ url_for('hello') }}" class="nav-button">Home</a>
+        <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
+    </div>
+</div>
+{% endblock %}

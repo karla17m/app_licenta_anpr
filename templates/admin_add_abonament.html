@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Adaugă Abonament{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <h2>Adaugă Abonament</h2>
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    <form method="POST">
+        <div class="form-group">
+            <label for="id_utilizator">Utilizator:</label>
+            <select name="id_utilizator" id="id_utilizator" required>
+                {% for user in utilizatori %}
+                    <option value="{{ user.id_utilizator }}">{{ user.nume }} (ID: {{ user.id_utilizator }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="numar_inmatriculare">Număr Înmatriculare:</label>
+            <input type="text" name="numar_inmatriculare" required>
+        </div>
+        <div class="form-group">
+            <label for="zona">Zonă:</label>
+            <select name="zona" required>
+                <option value="Zona 1">Zona 1</option>
+                <option value="Zona 2">Zona 2</option>
+                <option value="Zona 3">Zona 3</option>
+                <option value="Zona 4">Zona 4</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="tip_abonament">Tip Abonament:</label>
+            <select name="tip_abonament" required>
+                <option value="ora">Orar</option>
+                <option value="zi">Zilnic</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="durata">Durată:</label>
+            <input type="number" name="durata" min="1" required>
+        </div>
+        <div class="form-group">
+            <label for="data_inceput">Data Început:</label>
+            <input type="datetime-local" name="data_inceput" required>
+        </div>
+        <button type="submit" class="btn btn-success">Adaugă Abonament</button>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Înapoi</a>
+    </form>
+</div>
+{% endblock %}

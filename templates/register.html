@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Înregistrare{% endblock %}
+
+{% block content %}
+<style>
+    .centered-form-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 85vh;
+        padding: 20px;
+        background-color: #f8f9fa;
+    }
+
+    .form-card {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+        width: 100%;
+    }
+
+    .form-card h2 {
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #007bff;
+        text-align: center;
+    }
+
+    .form-card .form-group label {
+        font-weight: 500;
+        text-align: left;
+    }
+
+    .btn-primary {
+        width: 100%;
+        padding: 10px;
+        font-size: 1rem;
+        border-radius: 6px;
+    }
+
+    .form-footer {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .form-footer a {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    .form-footer a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="centered-form-container">
+    <div class="form-card">
+        <h2>Înregistrare</h2>
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+        <form method="POST">
+            <div class="form-group">
+                <label for="nume">Nume</label>
+                <input type="text" id="nume" name="nume" class="form-control" placeholder="Nume complet" required autofocus>
+            </div>
+            <div class="form-group">
+                <label for="email">Adresă Email</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="exemplu@email.com" required>
+            </div>
+            <div class="form-group">
+                <label for="parola">Parolă</label>
+                <input type="password" id="parola" name="parola" class="form-control" placeholder="Parolă sigură" required>
+            </div>
+            <button class="btn btn-primary" type="submit">Înregistrare</button>
+        </form>
+        <div class="form-footer">
+            <span>Ai deja un cont? <a href="{{ url_for('login') }}">Autentificare</a></span>
+        </div>
+    </div>
+</div>
+{% endblock %}

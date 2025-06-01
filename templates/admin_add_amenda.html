@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Adaugă Amenda - TimiCamPark{% endblock %}
+
+{% block content %}
+<style>
+    .admin-container {
+        max-width: 700px;
+        margin: 40px auto;
+        padding: 30px;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.07);
+    }
+
+    h2 {
+        text-align: center;
+        color: #c0392b;
+        margin-bottom: 25px;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    label {
+        font-weight: bold;
+        color: #444;
+    }
+
+    input, select {
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+    }
+
+    .btn-submit {
+        background-color: #e74c3c;
+        color: white;
+        font-weight: bold;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-submit:hover {
+        background-color: #c0392b;
+    }
+
+    .btn-back {
+        text-align: center;
+        margin-top: 20px;
+        display: block;
+        color: #3498db;
+        text-decoration: none;
+    }
+
+    .error {
+        color: red;
+        font-size: 0.9rem;
+        text-align: center;
+    }
+</style>
+
+<div class="admin-container">
+    <h2>Adaugă o Amendă Manual</h2>
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <form method="post">
+        <label for="numar_inmatriculare">Număr înmatriculare</label>
+        <input type="text" id="numar_inmatriculare" name="numar_inmatriculare" required>
+
+        <label for="motiv">Motiv</label>
+        <input type="text" id="motiv" name="motiv" placeholder="ex: Abonament expirat, lipsă plată..." required>
+
+        <label for="zona">Zonă</label>
+        <select id="zona" name="zona" required>
+            <option value="">Selectează zona</option>
+            <option value="Zona 1">Zona 1</option>
+            <option value="Zona 2">Zona 2</option>
+            <option value="Zona 3">Zona 3</option>
+            <option value="Zona 4">Zona 4</option>
+        </select>
+
+        <label for="snapshot_path">Path spre imagine (snapshot)</label>
+        <input type="text" id="snapshot_path" name="snapshot_path" placeholder="ex: uploads/masina123.png" required>
+
+        <button type="submit" class="btn-submit">Adaugă Amenda</button>
+    </form>
+
+    <a href="{{ url_for('admin_amenzi') }}" class="btn-back">⏪ Înapoi la lista amenzilor</a>
+</div>
+{% endblock %}
