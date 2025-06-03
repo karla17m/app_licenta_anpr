@@ -40,48 +40,54 @@
         background-color: #f9f9f9;
     }
 
-    .button-container {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        margin-top: 20px;
-    }
-
-    .btn {
+    .btn-submit, .btn-cancel {
         border: none;
         padding: 10px 20px;
-        font-size: 0.95rem;
         border-radius: 6px;
+        font-size: 0.95rem;
         cursor: pointer;
         text-decoration: none;
-        color: white;
         transition: background-color 0.3s ease, transform 0.2s ease;
+        display: inline-block;
     }
 
-    .btn-back {
-        background-color: #3498db;
+    .btn-submit {
+        background-color: #2ecc71;
+        color: white;
     }
 
-    .btn-back:hover {
-        background-color: #217dbb;
+    .btn-submit:hover {
+        background-color: #27ae60;
         transform: translateY(-2px);
     }
 
-    .btn-export {
-        background-color: #27ae60;
+    .btn-cancel {
+        background-color: #95a5a6;
+        color: white;
     }
 
-    .btn-export:hover {
-        background-color: #219150;
+    .btn-cancel:hover {
+        background-color: #7f8c8d;
         transform: translateY(-2px);
     }
 
     .btn-delete {
         background-color: #e74c3c;
+        color: white;
     }
 
     .btn-delete:hover {
         background-color: #c0392b;
+        transform: translateY(-2px);
+    }
+
+    .btn-danger-all {
+        background-color: #8e44ad;
+        color: white;
+    }
+
+    .btn-danger-all:hover {
+        background-color: #732d91;
         transform: translateY(-2px);
     }
 
@@ -110,6 +116,27 @@
         color: #c0392b;
         border: 1px solid #e0b4b4;
     }
+
+    .edit-form {
+        margin-top: 10px;
+    }
+
+    .edit-form input[type="text"] {
+        padding: 5px;
+        width: 45%;
+        margin-right: 5px;
+    }
+
+    .delete-form {
+        display: inline-block;
+        margin-top: 10px;
+    }
+
+    .button-bar {
+        text-align: center;
+        margin: 30px 0;
+    }
+
 </style>
 
 <div class="admin-container">
@@ -132,11 +159,14 @@
             <option value="Zona 3">Zona 3</option>
             <option value="Zona 4">Zona 4</option>
         </select>
-        <button type="submit" class="btn btn-export">Filtrează</button>
+        <button type="submit" class="btn-submit">Filtrează</button>
     </form>
 
-    <div style="display: flex; justify-content: center; margin: 30px 0;">
-        <a href="{{ url_for('admin_add_amenda') }}" class="btn btn-export">➕ Adaugă Amendă</a>
+    <div class="button-bar">
+        <a href="{{ url_for('admin_add_amenda') }}" class="btn-submit">➕ Adaugă Amendă</a>
+        <form method="POST" action="{{ url_for('sterge_toate_amenzile') }}" onsubmit="return confirm('Ești sigur că vrei să ștergi toate amenzile?');" style="display:inline;">
+            <button type="submit" class="btn-danger-all">🗑️ Șterge Toate</button>
+        </form>
     </div>
 
     <table>
@@ -163,8 +193,12 @@
                     <a href="{{ url_for('static', filename=amenda.snapshot_path) }}" target="_blank">🖼️ Vezi</a>
                 </td>
                 <td>
-                    <form method="POST" action="{{ url_for('sterge_amenda', id_amenda=amenda.id_amenda) }}" onsubmit="return confirm('Sigur vrei să ștergi această amendă?');">
-                        <button type="submit" class="btn btn-delete">Șterge</button>
+                    <form method="POST" action="{{ url_for('editeaza_amenda', id=amenda.id_amenda) }}" class="edit-form">
+                        <input type="text" name="numar_inmatriculare" value="{{ amenda.numar_inmatriculare }}">
+                        <button type="submit" class="btn-submit">💾</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('sterge_amenda', id_amenda=amenda.id_amenda) }}" class="delete-form" onsubmit="return confirm('Sigur vrei să ștergi această amendă?');">
+                        <button type="submit" class="btn-delete">Șterge</button>
                     </form>
                 </td>
             </tr>
@@ -172,9 +206,9 @@
         </tbody>
     </table>
 
-    <div class="button-container">
-        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-back">⏪ Înapoi la Dashboard</a>
-        <a href="{{ url_for('export_amenzi') }}" class="btn btn-export">⬇️ Exportă CSV</a>
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="{{ url_for('admin_dashboard') }}" class="btn-cancel">⏪ Înapoi la Dashboard</a>
+        <a href="{{ url_for('export_amenzi') }}" class="btn-submit" style="margin-left: 10px;">⬇️ Exportă CSV</a>
     </div>
 </div>
 {% endblock %}

@@ -2,15 +2,105 @@
 {% block title %}Adaugă Abonament{% endblock %}
 
 {% block content %}
-<div class="admin-container">
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 30px;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.07);
+    }
+
+    h2 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 30px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1rem;
+    }
+
+    .btn-submit, .btn-cancel {
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        text-decoration: none;
+    }
+
+    .btn-submit {
+        background-color: #2ecc71;
+        color: white;
+    }
+
+    .btn-submit:hover {
+        background-color: #27ae60;
+        transform: translateY(-2px);
+    }
+
+    .btn-cancel {
+        background-color: #3498db;
+        color: white;
+        margin-left: 10px;
+    }
+
+    .btn-cancel:hover {
+        background-color: #217dbb;
+        transform: translateY(-2px);
+    }
+
+    .alert-danger {
+        background-color: #e74c3c;
+        color: white;
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+</style>
+
+{% if este_admin %}
+    <div class="form-container">
+        <h2>Acces Restricționat</h2>
+        <p class="text-center" style="color:#e74c3c; font-weight:bold;">
+            Administratorii nu pot adăuga abonamente pentru ei înșiși.
+        </p>
+        <div class="text-center" style="margin-top: 30px;">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn-cancel">⏪ Înapoi la Dashboard</a>
+        </div>
+    </div>
+{% else %}
+<div class="form-container">
     <h2>Adaugă Abonament</h2>
     {% if error %}
-        <div class="alert alert-danger">{{ error }}</div>
+        <div class="alert-danger">{{ error }}</div>
     {% endif %}
     <form method="POST">
         <div class="form-group">
             <label for="id_utilizator">Utilizator:</label>
-            <select name="id_utilizator" id="id_utilizator" required>
+            <select name="id_utilizator" id="id_utilizator" class="form-control" required>
                 {% for user in utilizatori %}
                     <option value="{{ user.id_utilizator }}">{{ user.nume }} (ID: {{ user.id_utilizator }})</option>
                 {% endfor %}
@@ -18,11 +108,11 @@
         </div>
         <div class="form-group">
             <label for="numar_inmatriculare">Număr Înmatriculare:</label>
-            <input type="text" name="numar_inmatriculare" required>
+            <input type="text" name="numar_inmatriculare" class="form-control" required>
         </div>
         <div class="form-group">
             <label for="zona">Zonă:</label>
-            <select name="zona" required>
+            <select name="zona" class="form-control" required>
                 <option value="Zona 1">Zona 1</option>
                 <option value="Zona 2">Zona 2</option>
                 <option value="Zona 3">Zona 3</option>
@@ -31,21 +121,24 @@
         </div>
         <div class="form-group">
             <label for="tip_abonament">Tip Abonament:</label>
-            <select name="tip_abonament" required>
+            <select name="tip_abonament" class="form-control" required>
                 <option value="ora">Orar</option>
                 <option value="zi">Zilnic</option>
             </select>
         </div>
         <div class="form-group">
             <label for="durata">Durată:</label>
-            <input type="number" name="durata" min="1" required>
+            <input type="number" name="durata" class="form-control" min="1" required>
         </div>
         <div class="form-group">
             <label for="data_inceput">Data Început:</label>
-            <input type="datetime-local" name="data_inceput" required>
+            <input type="datetime-local" name="data_inceput" class="form-control" required>
         </div>
-        <button type="submit" class="btn btn-success">Adaugă Abonament</button>
-        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Înapoi</a>
+        <div class="text-center">
+            <button type="submit" class="btn-submit">Adaugă Abonament</button>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn-cancel">⏪ Înapoi la Dashboard</a>
+        </div>
     </form>
 </div>
+{% endif %}
 {% endblock %}

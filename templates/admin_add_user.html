@@ -1,10 +1,86 @@
 {% extends "base.html" %}
 {% block title %}Adaugă Utilizator{% endblock %}
+
 {% block content %}
-<div class="container mt-4" style="max-width: 600px;">
-    <h2 class="mb-4">Adaugă Utilizator</h2>
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 30px;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.07);
+    }
+
+    h2 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 30px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1rem;
+    }
+
+    .btn-submit, .btn-cancel {
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        text-decoration: none;
+    }
+
+    .btn-submit {
+        background-color: #2ecc71;
+        color: white;
+    }
+
+    .btn-submit:hover {
+        background-color: #27ae60;
+        transform: translateY(-2px);
+    }
+
+    .btn-cancel {
+        background-color: #3498db;
+        color: white;
+        margin-left: 10px;
+    }
+
+    .btn-cancel:hover {
+        background-color: #217dbb;
+        transform: translateY(-2px);
+    }
+
+    .alert-danger {
+        background-color: #e74c3c;
+        color: white;
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+</style>
+
+<div class="form-container">
+    <h2>Adaugă Utilizator</h2>
     {% if error %}
-        <div class="alert alert-danger">{{ error }}</div>
+        <div class="alert-danger">{{ error }}</div>
     {% endif %}
     <form method="POST">
         <div class="form-group">
@@ -26,8 +102,10 @@
                 <option value="1">Da</option>
             </select>
         </div>
-        <button type="submit" class="btn btn-success">Adaugă</button>
-        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary ml-2">Anulează</a>
+        <div style="text-align: center;">
+            <button type="submit" class="btn-submit">Adaugă</button>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn-cancel">⏪ Înapoi la Dashboard</a>
+        </div>
     </form>
 </div>
 {% endblock %}

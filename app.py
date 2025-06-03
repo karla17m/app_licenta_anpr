@@ -1,4 +1,6 @@
 import io
+import threading
+import time
 import sqlite3
 import os
 from datetime import datetime, timedelta
@@ -22,6 +24,27 @@ from utils.emails import (
     trimite_email_confirmare_abonament,
     trimite_email_reminder_expirare
 )
+
+
+def verificare_periodica_expirari():
+    while True:
+        try:
+            db = get_db()
+            now = datetime.now()
+            expira_in_15_min = now + timedelta(minutes=15)
+            abonamente = db.execute(
+                'SELECT a.numar_inmatriculare, a.data_sfarsit, u.email '
+                'FROM Abonamente a JOIN Utilizatori u ON a.id_utilizator = u.id_utilizator '
+                'WHERE a.status = ? AND a.data_sfarsit BETWEEN ? AND ?',
+                ('activ', now, expira_in_15_min)
+            ).fetchall()
+
+            for ab in abonamente:
+                trimite_email_reminder_expirare(ab['email'], ab['numar_inmatriculare'], ab['data_sfarsit'])
+        except Exception as e:
+            print(f"[Eroare verificare expirări]: {e}")
+        time.sleep(300)  # verifică la fiecare 5 minute
+
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -283,12 +306,16 @@ def cumpara_abonament():
             trimite_email_confirmare_abonament(
                 user_email,
                 {
-                    "numar": numar_inmatriculare,
+                    "numar_inmatriculare": numar_inmatriculare,
                     "zona": zona,
+                    "tip_abonament": tip_abonament,
+                    "durata": durata,
                     "inceput": data_inceput,
                     "sfarsit": data_sfarsit
+
                 }
             )
+
 
             db.commit()
             flash('Abonament achiziționat cu succes!', 'success')
@@ -590,41 +617,39 @@ def admin_add_abonament():
     error = None
 
     if request.method == 'POST':
-        id_utilizator = request.form.get('id_utilizator')
-        numar_inmatriculare = request.form.get('numar_inmatriculare').strip().upper()
-        zona = request.form.get('zona')
-        tip_abonament = request.form.get('tip_abonament')
-        durata = int(request.form.get('durata'))
-        data_inceput_str = request.form.get('data_inceput')
-
         try:
-            data_inceput = datetime.fromisoformat(data_inceput_str)
-            if tip_abonament == 'ora':
+            id_utilizator = request.form['id_utilizator']
+            numar = request.form['numar_inmatriculare'].strip().upper()
+            zona = request.form['zona']
+            tip = request.form['tip_abonament']
+            durata = int(request.form['durata'])
+            data_inceput = datetime.fromisoformat(request.form['data_inceput'])
+
+            if tip == 'ora':
                 data_sfarsit = data_inceput + timedelta(hours=durata)
                 pret = durata * (4 if zona == 'Zona 1' else 2 if zona == 'Zona 2' else 1 if zona == 'Zona 3' else 0.5)
-            elif tip_abonament == 'zi':
+            elif tip == 'zi':
                 data_sfarsit = data_inceput + timedelta(days=durata)
                 pret = durata * (40 if zona == 'Zona 1' else 20 if zona == 'Zona 2' else 10 if zona == 'Zona 3' else 5)
             else:
-                raise ValueError("Tip de abonament invalid")
+                raise ValueError("Tip invalid")
 
             db.execute('''
-                INSERT INTO Abonamente (id_utilizator, numar_inmatriculare, zona, tip_abonament, durata,
-                    data_inceput, data_sfarsit, pret, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (id_utilizator, numar_inmatriculare, zona, tip_abonament, durata,
-                  data_inceput, data_sfarsit, pret, 'activ'))
-
+                INSERT INTO Abonamente (id_utilizator, numar_inmatriculare, zona, tip_abonament, durata, data_inceput, data_sfarsit, pret, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'activ')
+            ''', (id_utilizator, numar, zona, tip, durata, data_inceput, data_sfarsit, pret))
             db.commit()
-            flash('Abonament adăugat cu succes!', 'success')
+            flash("Abonament adăugat cu succes!", "success")
             return redirect(url_for('admin_dashboard'))
 
         except Exception as e:
             error = f"Eroare: {e}"
 
-    utilizatori = db.execute('SELECT id_utilizator, nume FROM Utilizatori').fetchall()
-    #db.close()
-    return render_template('admin_add_abonament.html', error=error, utilizatori=utilizatori)
+    # 🔴 AICI EXCLUD ADMINII
+    utilizatori = db.execute('SELECT * FROM Utilizatori WHERE este_admin = 0').fetchall()
+
+    return render_template('admin_add_abonament.html', utilizatori=utilizatori, error=error)
+
 
 @app.route('/admin/delete_user/<int:user_id>', methods=['POST'])
 @login_required
@@ -732,53 +757,6 @@ def admin_abonamente_utilizator(user_id):
 
     return render_template('admin_abonamente_utilizator.html', abonamente=abonamente, utilizator=utilizator)
 
-@app.route('/anpr_detectie', methods=['POST'])
-def anpr_detectie():
-    try:
-        nr_inmatriculare = request.form.get('nr_inmatriculare')
-        zona = request.form.get('zona')  # zona asociata camerei
-        timestamp_str = request.form.get('timestamp')  # format: YYYY-MM-DD HH:MM:SS
-        imagine = request.files.get('snapshot')
-
-        if not all([nr_inmatriculare, zona, timestamp_str, imagine]):
-            return jsonify({"error": "Date lipsă!"}), 400
-
-        # Salvare imagine cu nume sigur + timestamp unic
-        timestamp_obj = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S")
-        filename = secure_filename(f"{nr_inmatriculare}_{timestamp_obj.strftime('%Y%m%d_%H%M%S')}.jpg")
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        imagine.save(filepath)
-
-        # Calea relativă pentru baza de date
-        snapshot_path = f"snapshots/{filename}"  # ← Asta va fi servită prin /static/snapshots/...
-
-        # Verificare abonament valid la acel moment
-        db = get_db()
-        query = '''
-            SELECT * FROM Abonamente
-            WHERE numar_inmatriculare = ?
-              AND zona = ?
-              AND data_inceput <= ? AND data_sfarsit >= ?
-              AND status = 'activ'
-        '''
-        abonament = db.execute(query, (nr_inmatriculare, zona, timestamp_str, timestamp_str)).fetchone()
-
-        are_abonament = bool(abonament)
-
-        # Salvare detecție
-        db.execute('''
-            INSERT INTO Detectii (numar_inmatriculare, zona, timestamp_intrare, snapshot_path, are_abonament)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (nr_inmatriculare, zona, timestamp_str, snapshot_path, int(are_abonament)))
-
-        db.commit()
-        #db.close()
-
-        return jsonify({"mesaj": "Detectie salvata cu succes", "abonament_valid": are_abonament}), 200
-
-    except Exception as e:
-        return jsonify({"eroare": str(e)}), 500
-
 
 # Endpoint pt a servi imaginile la nevoie
 @app.route('/static/snapshots/<path:filename>')
@@ -876,6 +854,92 @@ def sterge_amenda(id_amenda):
     flash('Amenda a fost ștearsă cu succes.', 'success')
     return redirect(url_for('admin_amenzi'))
 
+@app.route('/anpr_detectie', methods=['POST'])
+def anpr_detectie():
+    db = get_db()
+    data = request.get_json()
+
+    try:
+        numar = data.get('numar_inmatriculare', '').strip().upper()
+        timestamp_str = data.get('timestamp')
+        zona = data.get('zona')
+        id_camera = data.get('id_camera')
+        snapshot_base64 = data.get('snapshot_base64')
+
+        if not all([numar, timestamp_str, zona, snapshot_base64]):
+            print("[Eroare] Date lipsă în request:", data)
+            return jsonify({'error': 'Date lipsă'}), 400
+
+        timestamp = datetime.fromisoformat(timestamp_str)
+
+        # Verifică dacă are abonament valid
+        abonament = db.execute('''
+            SELECT * FROM Abonamente
+            WHERE numar_inmatriculare = ? AND zona = ? AND data_inceput <= ? AND data_sfarsit >= ?
+        ''', (numar, zona, timestamp, timestamp)).fetchone()
+
+        are_abonament = abonament is not None
+        print(f"[ANPR] {numar} în {zona} la {timestamp} - Abonament: {'DA' if are_abonament else 'NU'}")
+
+        # Salvează imaginea în folderul static/snapshots
+        snapshot_folder = os.path.join('static', 'snapshots')
+        os.makedirs(snapshot_folder, exist_ok=True)
+        filename = f"{numar}_{timestamp.strftime('%Y%m%d%H%M%S')}.jpg"
+        filepath = os.path.join(snapshot_folder, secure_filename(filename))
+
+        with open(filepath, "wb") as f:
+            f.write(base64.b64decode(snapshot_base64))
+
+        # Normalizează calea la stilul URL (cu slash normal)
+        snapshot_path = os.path.relpath(filepath, 'static').replace("\\", "/")
+
+
+        # Salvează în tabelul Detectii
+        db.execute('''
+            INSERT INTO Detectii (numar_inmatriculare, timestamp, snapshot_path, zona, are_abonament, id_camera, in_parcare)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (numar, timestamp, snapshot_path, zona, are_abonament, id_camera, 1))
+        print(f"[Detectie] Salvată: {numar} la {timestamp}")
+
+        # Dacă nu are abonament, salvează și în Amenzi
+        if not are_abonament:
+            db.execute('''
+                INSERT INTO Amenzi (numar_inmatriculare, timestamp, snapshot_path, zona, motiv)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (numar, timestamp, snapshot_path, zona, 'Fără abonament valid'))
+            print(f"[Amenda] Adăugată pentru {numar} în {zona}")
+
+        db.commit()
+        return jsonify({'status': 'OK'}), 200
+
+    except Exception as e:
+        print("[Eroare] Excepție în anpr_detectie:", str(e))
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/amenda/<int:id>/edit', methods=['POST'])
+@admin_required
+def editeaza_amenda(id):
+    db = get_db()
+    motiv_nou = request.form.get('motiv')
+    if motiv_nou:
+        db.execute("UPDATE amenzi SET motiv = ? WHERE id_amenda = ?", (motiv_nou, id))
+        db.commit()
+        flash("Amenda a fost actualizată cu succes.", "success")
+    else:
+        flash("Motivul nu poate fi gol.", "error")
+    return redirect(url_for('admin_amenzi'))
+
+@app.route('/admin/amenzi/sterge_tot', methods=['POST'])
+@login_required
+@admin_required
+def sterge_toate_amenzile():
+    db = get_db()
+    db.execute("DELETE FROM amenzi")
+    db.commit()
+    flash("Toate amenzile au fost șterse.", "success")
+    return redirect(url_for('admin_amenzi'))
+
 
 if __name__ == '__main__':
+    threading.Thread(target=verificare_periodica_expirari, daemon=True).start()
     app.run(debug=True)

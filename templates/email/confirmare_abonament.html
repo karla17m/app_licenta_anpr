@@ -8,6 +8,9 @@
         <li><strong>Zonă:</strong> {{ abonament.zona }}</li>
         <li><strong>Tip:</strong> {{ abonament.tip_abonament }}</li>
         <li><strong>Durată:</strong> {{ abonament.durata }} {{ 'ore' if abonament.tip_abonament == 'ora' else 'zile' }}</li>
+        <li><strong>Început:</strong> {{ abonament.inceput.strftime('%d-%m-%Y %H:%M') }}</li>
+        <li><strong>Final:</strong> {{ abonament.sfarsit.strftime('%d-%m-%Y %H:%M') }}</li>
+
     </ul>
     <p>Mulțumim că folosești TimiCamPark!</p>
 </body>

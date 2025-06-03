@@ -7,43 +7,59 @@
         max-width: 800px;
         margin: 40px auto;
         padding: 30px;
-        background-color: #f9f9f9;
+        background-color: #ffffff;
         border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.07);
         text-align: center;
     }
 
     .stats-container h2 {
         color: #2c3e50;
-        margin-bottom: 25px;
+        margin-bottom: 30px;
+        font-size: 2rem;
     }
 
     .stat {
-        font-size: 1.4rem;
-        margin: 15px 0;
-        color: #34495e;
+        font-size: 1.2rem;
+        margin: 20px 0;
+        color: #2c3e50;
     }
 
     .highlight {
         font-weight: bold;
-        color: #2980b9;
+        color: #27ae60;
     }
 
     .button-container {
-        margin-top: 30px;
+        margin-top: 40px;
+    }
+
+    .nav-button {
+        background-color: #3498db;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 1rem;
+        text-decoration: none;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .nav-button:hover {
+        background-color: #217dbb;
+        transform: translateY(-2px);
     }
 </style>
 
 <div class="stats-container">
-    <h2>Statistici Generale</h2>
+    <h2>📊 Statistici Generale</h2>
 
-    <div class="stat">Total Utilizatori: <span class="highlight">{{ total_utilizatori }}</span></div>
-    <div class="stat">Total Abonamente: <span class="highlight">{{ total_abonamente }}</span></div>
-    <div class="stat">Abonamente Active: <span class="highlight">{{ abonamente_active }}</span></div>
-    <div class="stat">Încasări Totale: <span class="highlight">{{ incasari_totale }} lei</span></div>
+    <div class="stat">👥 Total Utilizatori: <span class="highlight">{{ total_utilizatori }}</span></div>
+    <div class="stat">🚗 Total Abonamente: <span class="highlight">{{ total_abonamente }}</span></div>
+    <div class="stat">✅ Abonamente Active: <span class="highlight">{{ abonamente_active }}</span></div>
+    <div class="stat">💰 Încasări Totale: <span class="highlight">{{ incasari_totale }} lei</span></div>
 
     <div class="button-container">
-        <a href="{{ url_for('admin_dashboard') }}" class="nav-button">← Înapoi la Dashboard</a>
+        <a href="{{ url_for('admin_dashboard') }}" class="nav-button">⏪ Înapoi la Dashboard</a>
     </div>
 </div>
 {% endblock %}
